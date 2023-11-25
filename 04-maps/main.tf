@@ -1,6 +1,18 @@
-variable "names" {
-  type = list(string)
-  default = ["foo", "bar", "bazs"]
+variable "users" {
+  default = {
+    foo = {
+      department = "devops",
+      country    = "india"
+    },
+    bar = {
+      department = "devops",
+      country    = "us"
+    },
+    baz = {
+      department = "devops",
+      country     = "uk"
+    }
+  }
 }
 
 terraform {
@@ -11,14 +23,16 @@ terraform {
     }
   }
 }
+
 provider "aws" {
   region = "us-east-1"
 }
 
 resource "aws_iam_user" "my_iam_users" {
-  #count = length(var.names)
-  #name  = var.names[count.index]
-  for_each = toset(var.names)
-  name     = each.value
+  for_each = var.users
+  name     = each.key
+  tags = {
+    Country = each.value.country
+    department = each.value.department
+  }
 }
-
